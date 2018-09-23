@@ -1,0 +1,86 @@
+sub ticker()
+    
+    Dim i As LongLong
+    Dim j As LongLong
+    Dim k As Long
+    Dim ticker As String
+    Dim open_price As Double
+    Dim close_price As Double
+    Dim percent_change As Double
+    Dim total_volume As LongLong
+    Dim LastRow As Long
+    Dim Greatest_inc_ticker As String
+    Dim Greatest_dec_ticker As String
+    Dim Greatest_vol_ticker As String
+    Dim Greatest_inc_val As Double
+    Dim Greatest_dec_val As Double
+    Dim Greatest_vol_val As Double
+    
+    For Each ws In Worksheets
+   
+        ws.Range("I1").Value = "Ticker"
+        ws.Range("J1").Value = "Yearly Change"
+        ws.Range("K1").Value = "Percent Change"
+        ws.Range("L1").Value = "Total Stock Volume"
+        ws.Range("P1").Value = "Ticker"
+        ws.Range("Q1").Value = "Value"
+        ws.Range("O2").Value = "Greatest % Increase"
+        ws.Range("O3").Value = "Greatest % Decrease"
+        ws.Range("O4").Value = "Greatest Total Volume"
+        
+        i = 2
+        j = 2
+        k = 2
+        total_volume = 0
+        ticker = "": open_price = 0: close_price = 0: percent_change = 0: LastRow = 0
+        Greatest_inc_ticker = "": Greatest_dec_ticker = "": Greatest_vol_ticker = "": Greatest_inc_val = 0: Greatest_dec_val = 0: Greatest_vol_val = 0
+        
+        LastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        
+        For i = 2 To LastRow
+            open_price = ws.Cells(i, 3).Value
+            total_volume = 0
+            
+            Do While ws.Cells(j, 1).Value = ws.Cells(i, 1).Value
+                ticker = ws.Cells(j, 1).Value
+                j = j + 1
+                total_volume = total_volume + ws.Cells(j, 7).Value
+            Loop
+            close_price = ws.Cells(j - 1, 6).Value
+            i = j
+            If open_price > 0 Then
+                ws.Cells(k, 9).Value = ticker
+                ws.Cells(k, 10).Value = close_price - open_price
+                percent_change = (close_price - open_price) / open_price
+                ws.Cells(k, 11).Value = Format(percent_change, "0.00%")
+                If (percent_change < 0) Then
+                    ws.Cells(k, 11).Interior.ColorIndex = 3
+                ElseIf (percent_change > 0) Then
+                    ws.Cells(k, 11).Interior.ColorIndex = 10
+                End If
+                ws.Cells(k, 12).Value = total_volume
+                k = k + 1
+                
+                If percent_change > Greatest_inc_val Then
+                    Greatest_inc_val = percent_change
+                    Greatest_inc_ticker = ticker
+                End If
+                If percent_change < Greatest_dec_val Then
+                    Greatest_dec_val = percent_change
+                    Greatest_dec_ticker = ticker
+                End If
+                If total_volume > Greatest_vol_val Then
+                    Greatest_vol_val = total_volume
+                    Greatest_vol_ticker = ticker
+                End If
+            End If
+            
+        Next i
+        ws.Range("P2").Value = Greatest_inc_ticker
+        ws.Range("Q2").Value = Format(Greatest_inc_val, "0.00%")
+        ws.Range("P3").Value = Greatest_dec_ticker
+        ws.Range("Q3").Value = Format(Greatest_dec_val, "0.00%")
+        ws.Range("P4").Value = Greatest_vol_ticker
+        ws.Range("Q4").Value = Greatest_vol_val
+    Next ws
+End Sub
